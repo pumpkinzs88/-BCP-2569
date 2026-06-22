@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบความรู้ความเข้าใจและแบบประเมินความพึงพอใจการซ้อมแผน BCP - โรงพยาบาลจอมพระ</title>
+    <!-- Tailwind CSS สำหรับความสวยงาม -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js สำหรับทำ Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 สำหรับแจ้งเตือนสวยงาม -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f0f8ff; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .radio-btn:checked + label { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .survey-radio:checked { accent-color: #2563eb; transform: scale(1.2); }
+        .hide { display: none !important; }
+        /* แต่ง Scrollbar สำหรับมือถือให้เห็นชัดขึ้นว่าปัดได้ */
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center gap-2">
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer overflow-hidden" onclick="navigate('home')">
+                    <svg class="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <span class="font-bold text-sm sm:text-base md:text-xl truncate">กิจกรรมซ้อมแผน BCP รพ.จอมพระ</span>
+                </div>
+                <div>
+                    <button onclick="navigate('adminLogin')" class="bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition shadow whitespace-nowrap">ผู้ดูแลระบบ</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-8 w-full max-w-7xl mx-auto" id="app-container">
+        <!-- เนื้อหาจะถูกแทรกที่นี่โดย JavaScript -->
+    </main>
+
+    <footer class="bg-blue-900 text-white text-center p-4 text-xs sm:text-sm mt-auto">
+        &copy;  กลุ่มงานสุขภาพดิจิทัล โรงพยาบาลจอมพระ (แผน BCP) ปีงบ 2569
+    </footer>
+
+<script>
+    // ==========================================
+    // DATA & CONFIGURATION
+    // ==========================================
+    const questions = [
+        { q: "รหัส 'IT โปงลาง 1' หมายถึงสถานการณ์ในระดับใดตามแผน BCP ของโรงพยาบาลจอมพระ", options: ["ก. ระบบขัดข้องรุนแรงใช้เวลามากกว่า 15 นาที", "ข. การเกิดภัยธรรมชาติทำให้ระบบสารสนเทศเสียหาย", "ค. ระบบขัดข้องชั่วคราวใช้เวลาแก้ไขไม่เกิน 15 นาที", "ง. ระบบสารสนเทศสามารถกลับมาใช้งานได้ตามปกติ"], ans: 2 },
+        { q: "เมื่อมีการประกาศรหัส 'IT โปงลาง 2' หน่วยงานต่างๆ ภายในโรงพยาบาลควรปฏิบัติอย่างไร", options: ["ก. รอการประกาศให้เรียกรวมตัว", "ข. ติดต่อขอความช่วยเหลือจากเจ้าหน้าที่ IT", "ค. หยุดการให้บริการผู้ป่วยจนกว่าระบบจะใช้งานได้", "ง. ดำเนินงานตามแนวปฏิบัติของแต่ละหน่วยงาน ตามคู่มือ BCP"], ans: 3 },
+        { q: "หากเกิดปัญหาระบบสารสนเทศล่ม เจ้าหน้าที่หน่วยงานต่างๆ ควรติดต่อแจ้งเหตุที่หมายเลขโทรศัพท์ภายในหมายเลขใด", options: ["ก. 102", "ข. 161", "ค. 151", "ง. 112"], ans: 1 },
+        { q: "เมื่อมีการประกาศรหัส 'IT โปงลาง 2' ทุกหน่วยงานต้องบันทึกข้อมูลการให้บริการย้อนหลังเข้าสู่ระบบให้เสร็จสิ้นภายในระยะเวลาเท่าใด", options: ["ก. ภายใน 1 ชั่วโมงหลังจากเหตุการณ์ปกติ", "ข. ภายใน 24 ชั่วโมง", "ค. ภายใน 48 ชั่วโมง", "ง. ไม่มีข้อใดถูก"], ans: 1 },
+        { q: "กรณีระบบล่มและผู้ป่วยต้องชำระเงิน เจ้าหน้าที่การเงินต้องอ้างอิงราคาค่าบริการจากแหล่งใด", options: ["ก. อ้างอิงสิทธิข้าราชการ", "ข. อ้างอิงสิทธิหลักประกันสุขภาพ", "ค. อ้างอิงสิทธิประกันสังคม", "ง. ไม่ต้องชำระเงิน"], ans: 0 },
+        { q: "ตามโครงสร้างการบังคับบัญชา ใครคือผู้บริหารเทคโนโลยีสารสนเทศระดับสูง (CIO) ของโรงพยาบาลจอมพระ", options: ["ก. หัวหน้าฝ่ายบริหาร", "ข. ผู้อำนวยการโรงพยาบาลจอมพระ", "ค. หัวหน้างานศูนย์คุณภาพ", "ง. หัวหน้างานสุขภาพดิจิทัล"], ans: 1 },
+        { q: "ในกรณีที่ศูนย์คอมพิวเตอร์เกิดไฟฟ้าขัดข้อง ระบบสำรองไฟฟ้า (UPS) สามารถจ่ายไฟสำรองได้นานเท่าใด", options: ["ก. 5 นาที", "ข. 15 นาที", "ค. 30 นาที", "ง. 60 นาที"], ans: 2 },
+        { q: "เมื่อพบว่าระบบเครือข่ายถูกผู้บุกรุก ขั้นตอนแรกที่ผู้ดูแลระบบต้องดำเนินการคืออะไร", options: ["ก. ลบฐานข้อมูลทิ้งเพื่อป้องกันการรั่วไหล", "ข. ปิดเครื่องแม่ข่ายทันที", "ค. ตรวจสอบ log และ firewall", "ง. ประกาศแจ้งเตือนให้ทุกคนทราบ"], ans: 2 },
+        { q: "หากเกิดสถานการณ์น้ำท่วม แผน BCP กำหนดให้เคลื่อนย้ายอุปกรณ์คอมพิวเตอร์ไปติดตั้งที่สถานที่ใด", options: ["ก. อาคารแพทย์แผนไทย", "ข. อาคารกายภาพบำบัด", "ค. ตึกอำนวยการชั้น 2", "ง. ไม่ต้องเคลื่อนย้าย"], ans: 2 },
+        { q: "หัวข้อใดต่อไปนี้เป็นส่วนหนึ่งของการสรุปรายงานผลหลังสิ้นสุดเหตุการณ์ (Post-Incident Report) ตามแผน BCP", options: ["ก. ระบุสาเหตุและประเมินความเสียหาย", "ข. รายงานบันทึกการเข้าปฏิบัติงาน", "ค. รายชื่อผู้ป่วยที่มาเข้ารับบริการ", "ง. สรุปยอดค่ารักษา"], ans: 0 }
+    ];
+
+    const surveySections = [
+        { title: "1. การถ่ายทอดความรู้ของวิทยากร", items: ["1.1 การถ่ายทอดความรู้ของวิทยากรมีความชัดเจน", "1.2 ความสามารถในการอธิบายเนื้อหา", "1.3 การเชื่อมโยงเนื้อหาในการฝึกอบรม", "1.4 มีความครบถ้วนของเนื้อหาในการฝึกอบรม", "1.5 การใช้เวลาตามที่กำหนดไว้", "1.6 การตอบข้อซักถามในการฝึกอบรม"] },
+        { title: "2. ด้านสถานที่ / ระยะเวลา / อาหาร", items: ["2.1 สถานที่สะอาดและมีความเหมาะสม", "2.2 ความพร้อมของอุปกรณ์โสตทัศนูปกรณ์", "2.3 ระยะเวลาในการอบรมมีความเหมาะสม", "2.4 อาหารว่าง มีความเหมาะสม"] },
+        { title: "3. นำความรู้ที่ได้รับไปประยุกต์ใช้ในการปฏิบัติงานได้", items: ["3.1 การจัดกิจกรรมในครั้งนี้มีประโยชน์ต่อท่าน", "3.2 สามารถนำความรู้ที่ได้รับไปประยุกต์ใช้ในการปฏิบัติงานได้", "3.3 สามารถนำความรู้ไปเผยแพร่/ถ่ายทอดได้"] }
+    ];
+
+    // State Variables
+    let appData = JSON.parse(localStorage.getItem('bcp_data')) || [];
+    let currentUser = null;
+    let currentQuizAnswers = [];
+    let activeTestType = ''; // 'pre', 'post', or 'survey'
+
+    // Dashboard Charts References
+    let prePostChart, genderChart, ageChart, eduChart, surveyChart, surveySubChart;
+
+    // ==========================================
+    // NAVIGATION & RENDER ENGINE
+    // ==========================================
+    const container = document.getElementById('app-container');
+
+    function navigate(screen) {
+        window.scrollTo(0, 0);
+        switch(screen) {
+            case 'home': renderHome(); break;
+            case 'preRegister': renderPreRegister(); break;
+            case 'postSearch': renderPostSearch(); break;
+            case 'quiz': renderQuiz(); break;
+            case 'survey': renderSurvey(); break;
+            case 'adminLogin': renderAdminLogin(); break;
+            case 'dashboard': renderDashboard(); break;
+        }
+    }
+
+    // เริ่มแบบประเมินทันที (ไม่ระบุชื่อ)
+    function startAnonymousSurvey() {
+        activeTestType = 'survey';
+        currentUser = {
+            id: Date.now().toString(),
+            name: 'ไม่ระบุชื่อ',
+            gender: '', age: '', education: '', department: '', position: '',
+            preScore: '', postScore: '', // ข้ามคะแนนสอบ
+            preAnswers: [], postAnswers: [],
+            survey: {}, suggestion: ''
+        };
+        navigate('survey');
+    }
+
+    // ==========================================
+    // SCREENS
+    // ==========================================
+    function renderHome() {
+        container.innerHTML = `
+            <div class="max-w-5xl mx-auto text-center mt-6 sm:mt-10">
+                <img src="https://cdn-icons-png.flaticon.com/512/1055/1055683.png" class="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 object-cover drop-shadow-xl opacity-90" alt="รูปคอมพิวเตอร์">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-900 mb-4 px-2">แบบทดสอบความรู้และ<br>แบบประเมินความพึงพอใจการซ้อมแผน BCP</h1>
+                <p class="text-base sm:text-lg text-gray-600 mb-10 px-4">กลุ่มงานสุขภาพดิจิทัล โรงพยาบาลจอมพระ ปีงบประมาณ 2569</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div onclick="navigate('preRegister')" class="glass-card p-6 md:p-8 rounded-2xl shadow-lg cursor-pointer transform hover:scale-105 transition duration-300 border-t-4 border-blue-500">
+                        <div class="text-blue-500 mb-4"><svg class="w-12 h-12 sm:w-14 sm:h-14 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></div>
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">1. แบบทดสอบก่อนเรียน</h2>
+                        <p class="text-gray-500 text-sm">ลงทะเบียนและทำ Pre-test</p>
+                    </div>
+                    
+                    <div onclick="navigate('postSearch')" class="glass-card p-6 md:p-8 rounded-2xl shadow-lg cursor-pointer transform hover:scale-105 transition duration-300 border-t-4 border-green-500">
+                        <div class="text-green-500 mb-4"><svg class="w-12 h-12 sm:w-14 sm:h-14 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">2. แบบทดสอบหลังเรียน</h2>
+                        <p class="text-gray-500 text-sm">ค้นหาชื่อและทำ Post-test</p>
+                    </div>
+
+                    <div onclick="startAnonymousSurvey()" class="glass-card p-6 md:p-8 rounded-2xl shadow-lg cursor-pointer transform hover:scale-105 transition duration-300 border-t-4 border-purple-500 sm:col-span-2 lg:col-span-1">
+                        <div class="text-purple-500 mb-4"><svg class="w-12 h-12 sm:w-14 sm:h-14 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg></div>
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">3. แบบประเมินความพึงพอใจ</h2>
+                        <p class="text-gray-500 text-sm">คลิกเพื่อทำแบบประเมิน (ไม่ต้องลงชื่อ)</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderPreRegister() {
+        activeTestType = 'pre';
+        container.innerHTML = `
+            <div class="max-w-2xl mx-auto glass-card rounded-2xl shadow-xl overflow-hidden mt-4">
+                <div class="bg-blue-600 text-white p-4 sm:p-6 text-center">
+                    <h2 class="text-xl sm:text-2xl font-bold">ลงทะเบียนทำแบบทดสอบก่อนเรียน (Pre-test)</h2>
+                </div>
+                <div class="p-6 sm:p-8">
+                    <form id="regForm" class="space-y-4 sm:space-y-5" onsubmit="handleRegister(event)">
+                        <div><label class="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">ชื่อ - นามสกุล</label>
+                        <input type="text" id="regName" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ระบุชื่อและนามสกุล"></div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div><label class="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">เพศ</label>
+                            <select id="regGender" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="">เลือกเพศ</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option>
+                            </select></div>
+                            <div><label class="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">ช่วงอายุ</label>
+                            <select id="regAge" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="">เลือกช่วงอายุ</option><option value="10-20">10-20 ปี</option><option value="21-30">21-30 ปี</option><option value="31-40">31- 40 ปี</option><option value="41-50">41-50 ปี</option><option value="51+">51 ปีขึ้นไป</option>
+                            </select></div>
+                        </div>
+
+                        <div><label class="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">ระดับการศึกษา</label>
+                        <select id="regEdu" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="">เลือกระดับการศึกษา</option><option value="ต่ำกว่าปริญญาตรี">ต่ำกว่าปริญญาตรี</option><option value="ปริญญาตรี">ปริญญาตรี</option><option value="สูงกว่าปริญญาตรี">สูงกว่าปริญญาตรี</option>
+                        </select></div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div><label class="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">กลุ่มงาน</label>
+                            <input type="text" id="regDept" required class="w-full px-4 py-3 rounded-lg border outline-none" placeholder="ระบุกลุ่มงาน"></div>
+                            <div><label class="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">ตำแหน่งงาน</label>
+                            <input type="text" id="regPos" required class="w-full px-4 py-3 rounded-lg border outline-none" placeholder="ระบุตำแหน่ง"></div>
+                        </div>
+
+                        <div class="pt-6 flex flex-col-reverse sm:flex-row justify-between gap-3">
+                            <button type="button" onclick="navigate('home')" class="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300">ยกเลิก</button>
+                            <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md">เริ่มทำแบบทดสอบ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderPostSearch() {
+        activeTestType = 'post';
+        const nameOptions = appData.map(u => `<option value="${u.name}">`).join('');
+        container.innerHTML = `
+            <div class="max-w-xl mx-auto glass-card rounded-2xl shadow-xl overflow-hidden mt-10">
+                <div class="bg-green-600 text-white p-5 sm:p-6 text-center">
+                    <h2 class="text-xl sm:text-2xl font-bold">ค้นหาชื่อเพื่อทำแบบทดสอบหลังเรียน</h2>
+                </div>
+                <div class="p-6 sm:p-8">
+                    <form onsubmit="handleSearch(event)">
+                        <label class="block text-gray-700 font-medium mb-2 text-base sm:text-lg">ค้นหา ชื่อ - นามสกุล</label>
+                        <input type="text" id="searchName" list="namesList" required class="w-full px-4 py-4 text-base sm:text-lg rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-0 outline-none mb-6" placeholder="พิมพ์ชื่อของท่าน...">
+                        <datalist id="namesList">${nameOptions}</datalist>
+                        
+                        <div class="flex flex-col-reverse sm:flex-row justify-between gap-3">
+                            <button type="button" onclick="navigate('home')" class="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300">กลับหน้าหลัก</button>
+                            <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 shadow-md text-base sm:text-lg">ค้นหาและเริ่มทำ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderQuiz() {
+        currentQuizAnswers = new Array(10).fill(null);
+        let qHtml = questions.map((q, idx) => `
+            <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+                <p class="font-bold text-base sm:text-lg mb-4 text-gray-800 leading-relaxed"><span class="text-blue-600">ข้อที่ ${idx + 1}.</span> ${q.q}</p>
+                <div class="space-y-3">
+                    ${q.options.map((opt, oIdx) => `
+                        <div class="relative">
+                            <input class="hidden radio-btn" type="radio" name="q${idx}" id="q${idx}_o${oIdx}" value="${oIdx}" onchange="currentQuizAnswers[${idx}]=${oIdx}">
+                            <label class="flex items-start sm:items-center p-3 sm:p-4 border rounded-lg cursor-pointer hover:bg-blue-50 transition min-h-[3rem]" for="q${idx}_o${oIdx}">
+                                <span class="text-sm sm:text-base leading-snug">${opt}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">แบบทดสอบความรู้ความเข้าใจ</h2>
+                        <p class="text-blue-600 font-medium text-base sm:text-lg">โหมด: ${activeTestType === 'pre' ? 'ก่อนเรียน (Pre-test)' : 'หลังเรียน (Post-test)'}</p>
+                    </div>
+                    <div class="text-left sm:text-right text-gray-500 font-medium text-sm sm:text-base bg-blue-50 sm:bg-transparent px-3 py-1 sm:p-0 rounded-lg">
+                        ชื่อผู้ทำ: <span class="text-gray-800">${currentUser.name}</span>
+                    </div>
+                </div>
+                <form onsubmit="submitQuiz(event)">
+                    ${qHtml}
+                    <div class="text-center mt-8 mb-16">
+                        <button type="submit" class="w-full sm:w-auto px-8 sm:px-12 py-4 bg-blue-600 text-white rounded-full font-bold text-lg sm:text-xl hover:bg-blue-700 shadow-lg transform hover:-translate-y-1 transition">
+                            ส่งคำตอบและเสร็จสิ้น
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+    }
+
+    function renderSurvey() {
+        let surveyHtml = surveySections.map((sec, sIdx) => `
+            <div class="mb-6 sm:mb-8 bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-base sm:text-lg text-purple-800 mb-4">${sec.title}</h3>
+                <div class="overflow-x-auto custom-scrollbar pb-4">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="p-3 w-1/2 text-sm sm:text-base">หัวข้อประเมิน</th>
+                            <th class="p-2 sm:p-3 text-center text-xs sm:text-sm">มากที่สุด<br>(5)</th>
+                            <th class="p-2 sm:p-3 text-center text-xs sm:text-sm">มาก<br>(4)</th>
+                            <th class="p-2 sm:p-3 text-center text-xs sm:text-sm">ปานกลาง<br>(3)</th>
+                            <th class="p-2 sm:p-3 text-center text-xs sm:text-sm">น้อย<br>(2)</th>
+                            <th class="p-2 sm:p-3 text-center text-xs sm:text-sm">น้อยที่สุด<br>(1)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sec.items.map((item, iIdx) => `
+                            <tr class="border-b hover:bg-gray-50 transition">
+                                <td class="p-3 text-xs sm:text-sm text-gray-700 pr-4">${item}</td>
+                                ${[5,4,3,2,1].map(score => `
+                                    <td class="p-2 sm:p-3 text-center align-middle">
+                                        <div class="flex justify-center items-center h-full min-h-[44px]">
+                                            <input type="radio" name="s_${sIdx}_${iIdx}" value="${score}" required class="w-5 h-5 sm:w-6 sm:h-6 survey-radio cursor-pointer">
+                                        </div>
+                                    </td>
+                                `).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">แบบประเมินความพึงพอใจ</h2>
+                        <p class="text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">ในการเข้าร่วมกิจกรรมซ้อมแผน BCP</p>
+                    </div>
+                    ${currentUser.name !== 'ไม่ระบุชื่อ' ? `<div class="text-left sm:text-right text-gray-500 font-medium text-sm sm:text-base bg-purple-50 sm:bg-transparent px-3 py-1 sm:p-0 rounded-lg">ชื่อผู้ประเมิน: <span class="text-gray-800">${currentUser.name}</span></div>` : ''}
+                </div>
+                <form onsubmit="submitSurvey(event)">
+                    ${surveyHtml}
+                    <div class="mb-8 bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-base sm:text-lg text-purple-800 mb-4">4. ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</h3>
+                        <textarea id="suggestion" rows="4" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-sm sm:text-base" placeholder="พิมพ์ข้อเสนอแนะของท่านที่นี่..."></textarea>
+                    </div>
+                    <div class="text-center mt-8 mb-16">
+                        <button type="submit" class="w-full sm:w-auto px-8 sm:px-12 py-4 bg-purple-600 text-white rounded-full font-bold text-lg sm:text-xl hover:bg-purple-700 shadow-lg">
+                            ส่งแบบประเมิน
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+    }
+
+    function renderAdminLogin() {
+        container.innerHTML = `
+            <div class="max-w-md mx-auto mt-10 sm:mt-20 glass-card rounded-2xl shadow-xl overflow-hidden border-t-4 border-blue-900 mx-4 sm:mx-auto">
+                <div class="p-6 sm:p-8 text-center">
+                    <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-blue-900 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6">เข้าสู่ระบบผู้ดูแลระบบ</h2>
+                    <form onsubmit="handleLogin(event)" class="space-y-4">
+                        <input type="text" id="adminUser" required class="w-full px-4 py-3 rounded-lg border text-center outline-none focus:border-blue-500" placeholder="ชื่อผู้ใช้งาน">
+                        <input type="password" id="adminPass" required class="w-full px-4 py-3 rounded-lg border text-center outline-none focus:border-blue-500" placeholder="รหัสผ่าน">
+                        <button type="submit" class="w-full py-3 bg-blue-900 text-white rounded-lg font-bold hover:bg-blue-800 transition shadow">Log In</button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    // ==========================================
+    // LOGIC & DATA HANDLING
+    // ==========================================
+    function handleRegister(e) {
+        e.preventDefault();
+        currentUser = {
+            id: Date.now().toString(),
+            name: document.getElementById('regName').value.trim(),
+            gender: document.getElementById('regGender').value,
+            age: document.getElementById('regAge').value,
+            education: document.getElementById('regEdu').value,
+            department: document.getElementById('regDept').value,
+            position: document.getElementById('regPos').value,
+            preScore: '', postScore: '',
+            preAnswers: [], postAnswers: [],
+            survey: {}, suggestion: ''
+        };
+        navigate('quiz');
+    }
+
+    function handleSearch(e) {
+        e.preventDefault();
+        const searchName = document.getElementById('searchName').value.trim();
+        const found = appData.find(u => u.name === searchName);
+        if (found) {
+            currentUser = found;
+            navigate('quiz');
+        } else {
+            Swal.fire({ icon: 'error', title: 'ไม่พบชื่อ', text: 'กรุณาตรวจสอบชื่อ-นามสกุล หรือให้ทำลงทะเบียน Pre-test ก่อน' });
+        }
+    }
+
+    function submitQuiz(e) {
+        e.preventDefault();
+        if (currentQuizAnswers.includes(null)) {
+            Swal.fire({ icon: 'warning', title: 'ทำไม่ครบ', text: 'กรุณาตอบคำถามให้ครบทุกข้อ' });
+            return;
+        }
+
+        let score = 0;
+        currentQuizAnswers.forEach((ans, idx) => { if (ans === questions[idx].ans) score++; });
+
+        if (activeTestType === 'pre') {
+            currentUser.preScore = score;
+            currentUser.preAnswers = [...currentQuizAnswers];
+            appData.push(currentUser); 
+            saveDataLocally();
+            sendToGAS(currentUser); 
+            Swal.fire({ icon: 'success', title: 'เสร็จสิ้น', text: `คุณได้คะแนน Pre-test ${score}/10`, confirmButtonText: 'กลับหน้าหลัก' })
+                .then(() => navigate('home'));
+        } else {
+            currentUser.postScore = score;
+            currentUser.postAnswers = [...currentQuizAnswers];
+            const idx = appData.findIndex(u => u.id === currentUser.id);
+            if(idx !== -1) appData[idx] = currentUser;
+            saveDataLocally();
+            sendToGAS(currentUser); 
+            Swal.fire({ icon: 'success', title: 'เยี่ยมมาก', text: `คะแนน Post-test ของคุณคือ ${score}/10`, confirmButtonText: 'กลับหน้าหลัก' })
+                .then(() => navigate('home'));
+        }
+    }
+
+    function submitSurvey(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        let surveyData = {};
+        for(let [key, value] of formData.entries()) { surveyData[key] = parseInt(value); }
+        
+        currentUser.survey = surveyData;
+        currentUser.suggestion = document.getElementById('suggestion').value.trim();
+        
+        const idx = appData.findIndex(u => u.id === currentUser.id);
+        if(idx !== -1) {
+            appData[idx] = currentUser;
+        } else {
+            // กรณีเป็นแบบประเมินนิรนาม ให้ Push เป็น User ใหม่ได้เลย
+            appData.push(currentUser);
+        }
+
+        saveDataLocally();
+        sendToGAS(currentUser); 
+
+        Swal.fire({ icon: 'success', title: 'ขอบคุณครับ', text: `ระบบได้บันทึกข้อมูลการประเมินของคุณแล้ว`, confirmButtonText: 'เสร็จสิ้น' })
+            .then(() => navigate('home'));
+    }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        if(document.getElementById('adminUser').value === 'admin' && document.getElementById('adminPass').value === '1234') {
+            navigate('dashboard');
+        } else {
+            Swal.fire({ icon: 'error', title: 'รหัสผ่านผิด!' });
+        }
+    }
+
+    function saveDataLocally() {
+        localStorage.setItem('bcp_data', JSON.stringify(appData));
+    }
+
+    function sendToGAS(data) {
+        const gasUrl = "https://script.google.com/macros/s/AKfycbwfEJ6JVnz56qCCISvWcnCw2cT_i2aNLjcwy6mx2NU_dmsoAFLbAg_pxU3w4CkHeiAzbg/exec";
+        fetch(gasUrl, { method: 'POST', body: JSON.stringify(data) })
+        .then(response => console.log('ส่งข้อมูลลง Google Sheets เรียบร้อยแล้ว'))
+        .catch(error => console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error));
+    }
+
+    // ==========================================
+    // EXPORT TO EXCEL (CSV)
+    // ==========================================
+    function exportToExcel() {
+        if(appData.length === 0) {
+            Swal.fire({icon: 'warning', title: 'ไม่มีข้อมูลให้ส่งออก'});
+            return;
+        }
+        
+        let csvContent = "\uFEFF"; // เพิ่ม BOM เพื่อให้ Excel อ่านภาษาไทยได้
+        const headers = ["ชื่อ-สกุล", "เพศ", "อายุ", "ระดับการศึกษา", "กลุ่มงาน", "ตำแหน่ง", "Pre-test", "Post-test", "S1.1", "S1.2", "S1.3", "S1.4", "S1.5", "S1.6", "S2.1", "S2.2", "S2.3", "S2.4", "S3.1", "S3.2", "S3.3", "ข้อเสนอแนะ"];
+        csvContent += headers.join(",") + "\n";
+        
+        appData.forEach(u => {
+            const s = u.survey || {};
+            const row = [
+                `"${u.name}"`, u.gender, u.age, `"${u.education}"`, `"${u.department}"`, `"${u.position}"`,
+                typeof u.preScore === 'number' ? u.preScore : "",
+                typeof u.postScore === 'number' ? u.postScore : "",
+                s.s_0_0||"", s.s_0_1||"", s.s_0_2||"", s.s_0_3||"", s.s_0_4||"", s.s_0_5||"",
+                s.s_1_0||"", s.s_1_1||"", s.s_1_2||"", s.s_1_3||"",
+                s.s_2_0||"", s.s_2_1||"", s.s_2_2||"",
+                `"${(u.suggestion||"").replace(/"/g, '""')}"` // ป้องกัน comma และ double quote ในข้อความ
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "ข้อมูลการประเมิน_BCP.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // ==========================================
+    // DATA MANAGEMENT (EDIT & DELETE)
+    // ==========================================
+    function deleteUser(id) {
+        Swal.fire({
+            title: 'ยืนยันการลบข้อมูล?',
+            text: "หากลบแล้วจะไม่สามารถกู้คืนข้อมูลนี้ได้!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'ใช่, ลบเลย!',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                appData = appData.filter(u => u.id !== id);
+                saveDataLocally();
+                Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
+                navigate('dashboard');
+            }
+        });
+    }
+
+    async function editUser(id) {
+        const userToEdit = appData.find(u => u.id === id);
+        if (!userToEdit) return;
+
+        const { value: formValues } = await Swal.fire({
+            title: 'แก้ไขข้อมูลผู้ใช้',
+            html:
+                `<div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ชื่อ - นามสกุล</label>
+                        <input id="swal-input1" class="swal2-input !w-full !m-0 !mt-1" value="${userToEdit.name}">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">เพศ</label>
+                            <select id="swal-input2" class="swal2-select !w-full !m-0 !mt-1 text-sm">
+                                <option value="ชาย" ${userToEdit.gender === 'ชาย' ? 'selected' : ''}>ชาย</option>
+                                <option value="หญิง" ${userToEdit.gender === 'หญิง' ? 'selected' : ''}>หญิง</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">อายุ</label>
+                            <select id="swal-input3" class="swal2-select !w-full !m-0 !mt-1 text-sm">
+                                <option value="10-20" ${userToEdit.age === '10-20' ? 'selected' : ''}>10-20</option>
+                                <option value="21-30" ${userToEdit.age === '21-30' ? 'selected' : ''}>21-30</option>
+                                <option value="31-40" ${userToEdit.age === '31-40' ? 'selected' : ''}>31-40</option>
+                                <option value="41-50" ${userToEdit.age === '41-50' ? 'selected' : ''}>41-50</option>
+                                <option value="51+" ${userToEdit.age === '51+' ? 'selected' : ''}>51+</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">กลุ่มงาน</label>
+                        <input id="swal-input4" class="swal2-input !w-full !m-0 !mt-1" value="${userToEdit.department}">
+                    </div>
+                </div>`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'บันทึก',
+            cancelButtonText: 'ยกเลิก',
+            preConfirm: () => {
+                return {
+                    name: document.getElementById('swal-input1').value.trim(),
+                    gender: document.getElementById('swal-input2').value,
+                    age: document.getElementById('swal-input3').value,
+                    department: document.getElementById('swal-input4').value.trim()
+                }
+            }
+        });
+
+        if (formValues) {
+            if (!formValues.name) {
+                Swal.fire('เกิดข้อผิดพลาด', 'กรุณาระบุชื่อ-นามสกุล', 'error');
+                return;
+            }
+            userToEdit.name = formValues.name;
+            userToEdit.gender = formValues.gender;
+            userToEdit.age = formValues.age;
+            userToEdit.department = formValues.department;
+            saveDataLocally();
+            Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', showConfirmButton: false, timer: 1500 });
+            navigate('dashboard');
+        }
+    }
+
+    // ==========================================
+    // ADMIN DASHBOARD
+    // ==========================================
+    function renderDashboard() {
+        container.innerHTML = `
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+                <h2 class="text-2xl sm:text-3xl font-bold text-blue-900">Dashboard สรุปผล</h2>
+                <div class="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                    <button onclick="exportToExcel()" class="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow flex items-center gap-2 text-sm sm:text-base">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        ส่งออกเป็น Excel
+                    </button>
+                    <button onclick="navigate('home')" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow text-sm sm:text-base">ออกจากระบบ</button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <div class="text-gray-500 text-xs sm:text-sm">จำนวนผู้ทำแบบทดสอบ (Pre/Post)</div>
+                    <div class="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">${appData.filter(u => typeof u.preScore === 'number' || typeof u.postScore === 'number').length} <span class="text-xs sm:text-sm font-normal text-gray-500">คน</span></div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                    <div class="text-gray-500 text-xs sm:text-sm">คะแนนเฉลี่ย ก่อนเรียน (Pre)</div>
+                    <div class="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">${calculateAverage('preScore')} <span class="text-xs sm:text-sm font-normal text-gray-500">/10</span></div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <div class="text-gray-500 text-xs sm:text-sm">คะแนนเฉลี่ย หลังเรียน (Post)</div>
+                    <div class="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">${calculateAverage('postScore')} <span class="text-xs sm:text-sm font-normal text-gray-500">/10</span></div>
+                </div>
+            </div>
+
+            <!-- Charts Section 1: Exams and Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+                    <div class="relative h-56 sm:h-64"><canvas id="prePostChart"></canvas></div>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+                    <div class="relative h-56 sm:h-64"><canvas id="surveyChart"></canvas></div>
+                </div>
+            </div>
+            
+            <!-- Charts Section 3: Demographics Layout -->
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 px-1">ข้อมูลผู้ตอบแบบสอบถาม</h3>
+            
+            <!-- กราฟเพศ (จัดไว้ตรงกลาง) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                <div class="md:col-start-2 bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+                    <div class="relative h-48 sm:h-64"><canvas id="genderChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- กราฟอายุ และ ระดับการศึกษา (วางข้างกัน 2 กราฟ) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+                    <div class="relative h-56 sm:h-64"><canvas id="ageChart"></canvas></div>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+                    <div class="relative h-56 sm:h-64"><canvas id="eduChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Charts Section 2: Full Survey Breakdown -->
+            <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 mb-8 w-full">
+                <div class="relative h-[300px] sm:h-[400px]"><canvas id="surveySubChart"></canvas></div>
+            </div>
+
+            <!-- Tabs Navigation (Responsive Scroll) -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-10 border border-gray-200">
+                <div class="flex border-b bg-gray-50 overflow-x-auto custom-scrollbar">
+                    <button class="px-4 sm:px-6 py-3 sm:py-4 font-bold text-sm sm:text-base text-blue-600 border-b-2 border-blue-600 focus:outline-none transition-colors whitespace-nowrap" id="btn-tab-data" onclick="switchTab('data')">รายชื่อและคะแนนสอบ</button>
+                    <button class="px-4 sm:px-6 py-3 sm:py-4 font-bold text-sm sm:text-base text-gray-500 hover:text-purple-600 focus:outline-none transition-colors whitespace-nowrap" id="btn-tab-survey" onclick="switchTab('survey')">ข้อมูลการประเมิน</button>
+                    <button class="px-4 sm:px-6 py-3 sm:py-4 font-bold text-sm sm:text-base text-gray-500 hover:text-green-600 focus:outline-none transition-colors whitespace-nowrap" id="btn-tab-ans" onclick="switchTab('ans')">เฉลยข้อสอบ BCP</button>
+                </div>
+                
+                <!-- Tab 1: รายชื่อและคะแนน -->
+                <div class="p-4 sm:p-6 overflow-x-auto custom-scrollbar" id="data-view">
+                    <table class="w-full text-left border-collapse whitespace-nowrap min-w-[500px]">
+                        <thead>
+                            <tr class="bg-blue-50 text-blue-900 text-xs sm:text-sm">
+                                <th class="p-2 sm:p-3 border-b">ชื่อ-สกุล</th>
+                                <th class="p-2 sm:p-3 border-b text-center hidden md:table-cell">เพศ/อายุ</th>
+                                <th class="p-2 sm:p-3 border-b hidden sm:table-cell">กลุ่มงาน</th>
+                                <th class="p-2 sm:p-3 border-b text-center">Pre</th>
+                                <th class="p-2 sm:p-3 border-b text-center">Post</th>
+                                <th class="p-2 sm:p-3 border-b text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appData.filter(u => typeof u.preScore === 'number' || typeof u.postScore === 'number').map(u => `
+                                <tr class="border-b hover:bg-gray-50 text-xs sm:text-sm">
+                                    <td class="p-2 sm:p-3 font-medium text-gray-800">${u.name}</td>
+                                    <td class="p-2 sm:p-3 text-center text-gray-600 hidden md:table-cell">${u.gender||'-'} / ${u.age||'-'}</td>
+                                    <td class="p-2 sm:p-3 text-gray-600 hidden sm:table-cell">${u.department||'-'}</td>
+                                    <td class="p-2 sm:p-3 text-center font-bold text-red-500">${typeof u.preScore === 'number' ? u.preScore : '-'}</td>
+                                    <td class="p-2 sm:p-3 text-center font-bold text-green-600">${typeof u.postScore === 'number' ? u.postScore : '-'}</td>
+                                    <td class="p-2 sm:p-3 text-center">
+                                        <div class="flex justify-center gap-1 sm:gap-2">
+                                            <button onclick="editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="แก้ไข">
+                                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            </button>
+                                            <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded" title="ลบ">
+                                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${appData.filter(u => typeof u.preScore === 'number' || typeof u.postScore === 'number').length === 0 ? '<tr><td colspan="6" class="p-4 sm:p-6 text-center text-gray-400 text-sm">ยังไม่มีข้อมูลการทดสอบ</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 2: ข้อมูลการประเมินรายบุคคล -->
+                <div class="p-4 sm:p-6 overflow-x-auto custom-scrollbar hidden" id="survey-view">
+                    <table class="w-full text-left border-collapse whitespace-nowrap min-w-[500px]">
+                        <thead>
+                            <tr class="bg-purple-50 text-purple-900 text-xs sm:text-sm">
+                                <th class="p-2 sm:p-3 border-b w-1/4">ชื่อ-สกุล</th>
+                                <th class="p-2 sm:p-3 border-b text-center w-1/6">พึงพอใจเฉลี่ย</th>
+                                <th class="p-2 sm:p-3 border-b">ข้อเสนอแนะ</th>
+                                <th class="p-2 sm:p-3 border-b text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appData.filter(u => u.survey && Object.keys(u.survey).length > 0).map(u => {
+                                const keys = Object.keys(u.survey);
+                                const sum = keys.reduce((acc, k) => acc + u.survey[k], 0);
+                                const avg = keys.length ? (sum / keys.length).toFixed(2) : '-';
+                                return `
+                                <tr class="border-b hover:bg-gray-50 text-xs sm:text-sm">
+                                    <td class="p-2 sm:p-3 font-medium text-gray-800">${u.name}</td>
+                                    <td class="p-2 sm:p-3 text-center font-bold text-purple-600">${avg}</td>
+                                    <td class="p-2 sm:p-3 text-gray-600 whitespace-normal min-w-[150px] sm:min-w-[200px] text-xs sm:text-sm">${u.suggestion || '-'}</td>
+                                    <td class="p-2 sm:p-3 text-center">
+                                        <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded" title="ลบข้อมูล">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                                `;
+                            }).join('')}
+                            ${appData.filter(u => u.survey && Object.keys(u.survey).length > 0).length === 0 ? '<tr><td colspan="4" class="p-4 sm:p-6 text-center text-gray-400 text-sm">ยังไม่มีข้อมูลการประเมิน</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 3: เฉลยข้อสอบ -->
+                <div class="p-4 sm:p-6 hidden" id="ans-view">
+                    <h3 class="text-lg sm:text-xl font-bold mb-4 text-green-700">เฉลยข้อสอบ BCP</h3>
+                    <ul class="space-y-3 sm:space-y-4">
+                        ${questions.map((q, i) => `
+                            <li class="p-3 sm:p-4 bg-green-50 rounded-xl border border-green-100">
+                                <p class="font-bold text-gray-800 mb-2 text-sm sm:text-base">${i+1}. ${q.q}</p>
+                                <p class="text-green-700 font-medium flex items-center gap-2 text-sm sm:text-base">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    ตอบ: ${q.options[q.ans]}
+                                </p>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+        initCharts();
+    }
+
+    // ฟังก์ชันสำหรับสลับ Tab
+    function switchTab(tabId) {
+        document.getElementById('data-view').classList.add('hidden');
+        document.getElementById('survey-view').classList.add('hidden');
+        document.getElementById('ans-view').classList.add('hidden');
+        
+        const btns = ['btn-tab-data', 'btn-tab-survey', 'btn-tab-ans'];
+        btns.forEach(id => {
+            document.getElementById(id).className = "px-4 sm:px-6 py-3 sm:py-4 font-bold text-sm sm:text-base text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap";
+        });
+        
+        document.getElementById(`${tabId}-view`).classList.remove('hidden');
+        
+        let activeColor = 'blue';
+        if (tabId === 'survey') activeColor = 'purple';
+        if (tabId === 'ans') activeColor = 'green';
+        
+        document.getElementById(`btn-tab-${tabId}`).className = `px-4 sm:px-6 py-3 sm:py-4 font-bold text-sm sm:text-base text-${activeColor}-600 border-b-2 border-${activeColor}-600 focus:outline-none transition-colors whitespace-nowrap`;
+    }
+
+    // Charting Logic
+    function initCharts() {
+        if(appData.length === 0) return;
+
+        // 1. Pre/Post Incorrect counts per question
+        let preIncorrect = new Array(10).fill(0);
+        let postIncorrect = new Array(10).fill(0);
+        appData.forEach(u => {
+            if(u.preAnswers && u.preAnswers.length) u.preAnswers.forEach((ans, i) => { if(ans !== questions[i].ans) preIncorrect[i]++; });
+            if(u.postAnswers && u.postAnswers.length) u.postAnswers.forEach((ans, i) => { if(ans !== questions[i].ans) postIncorrect[i]++; });
+        });
+
+        new Chart(document.getElementById('prePostChart'), {
+            type: 'bar',
+            data: {
+                labels: ['ข้อ1','ข้อ2','ข้อ3','ข้อ4','ข้อ5','ข้อ6','ข้อ7','ข้อ8','ข้อ9','ข้อ10'],
+                datasets: [
+                    { label: 'ตอบผิด (Pre)', data: preIncorrect, backgroundColor: 'rgba(239, 68, 68, 0.7)' },
+                    { label: 'ตอบผิด (Post)', data: postIncorrect, backgroundColor: 'rgba(34, 197, 94, 0.7)' }
+                ]
+            },
+            options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'จำนวนผู้ตอบผิด ก่อน-หลัง ในแต่ละข้อ', font: {family:'Prompt'} } } }
+        });
+
+        // 2. Survey Dashboard (ภาพรวม 3 ด้าน)
+        let t1_sum = 0, t1_count = 0;
+        let t2_sum = 0, t2_count = 0;
+        let t3_sum = 0, t3_count = 0;
+
+        appData.forEach(u => {
+            if(u.survey && Object.keys(u.survey).length > 0) {
+                for(let i=0; i<6; i++) { if(u.survey[`s_0_${i}`]) { t1_sum += u.survey[`s_0_${i}`]; t1_count++; } }
+                for(let i=0; i<4; i++) { if(u.survey[`s_1_${i}`]) { t2_sum += u.survey[`s_1_${i}`]; t2_count++; } }
+                for(let i=0; i<3; i++) { if(u.survey[`s_2_${i}`]) { t3_sum += u.survey[`s_2_${i}`]; t3_count++; } }
+            }
+        });
+        
+        const t1_avg = t1_count ? (t1_sum/t1_count).toFixed(2) : 0;
+        const t2_avg = t2_count ? (t2_sum/t2_count).toFixed(2) : 0;
+        const t3_avg = t3_count ? (t3_sum/t3_count).toFixed(2) : 0;
+
+        new Chart(document.getElementById('surveyChart'), {
+            type: 'bar',
+            data: {
+                labels: ['1.วิทยากร', '2.สถานที่/อาหาร', '3.การนำไปใช้'],
+                datasets: [{
+                    label: 'คะแนนเฉลี่ย',
+                    data: [t1_avg, t2_avg, t3_avg],
+                    backgroundColor: ['#8b5cf6', '#a855f7', '#d946ef']
+                }]
+            },
+            options: { 
+                maintainAspectRatio: false,
+                scales: { y: { min: 0, max: 5 } },
+                plugins: { title: { display: true, text: 'ภาพรวมความพึงพอใจ 3 ด้าน (เต็ม 5)', font: {family:'Prompt'} } } 
+            }
+        });
+
+        // 2.5 Survey Sub-Chart (รายละเอียด 13 ข้อย่อย แนวนอน)
+        let subItemSums = new Array(13).fill(0);
+        let subItemCounts = new Array(13).fill(0);
+        let subItemLabels = [];
+        
+        surveySections.forEach(sec => { sec.items.forEach(item => subItemLabels.push(item)); });
+
+        appData.forEach(u => {
+            if(u.survey && Object.keys(u.survey).length > 0) {
+                let globalIdx = 0;
+                for(let sIdx=0; sIdx<surveySections.length; sIdx++) {
+                    for(let iIdx=0; iIdx<surveySections[sIdx].items.length; iIdx++) {
+                        const val = u.survey[`s_${sIdx}_${iIdx}`];
+                        if(val) { subItemSums[globalIdx] += val; subItemCounts[globalIdx]++; }
+                        globalIdx++;
+                    }
+                }
+            }
+        });
+
+        const subItemAvgs = subItemSums.map((sum, i) => subItemCounts[i] ? (sum / subItemCounts[i]).toFixed(2) : 0);
+
+        new Chart(document.getElementById('surveySubChart'), {
+            type: 'bar',
+            data: {
+                labels: subItemLabels,
+                datasets: [{
+                    label: 'คะแนนเฉลี่ย (เต็ม 5)',
+                    data: subItemAvgs,
+                    backgroundColor: '#14b8a6' 
+                }]
+            },
+            options: { 
+                maintainAspectRatio: false,
+                indexAxis: 'y', 
+                scales: { x: { min: 0, max: 5 } },
+                plugins: { 
+                    title: { display: true, text: 'สรุปคะแนนความพึงพอใจรายข้อ (เต็ม 5)', font: {family:'Prompt'} },
+                    legend: { display: false }
+                } 
+            }
+        });
+
+        // 3. Demographics Helpers
+        const countBy = (prop) => appData.reduce((acc, obj) => { 
+            if(obj[prop]) { acc[obj[prop]] = (acc[obj[prop]] || 0) + 1; }
+            return acc; 
+        }, {});
+        const genderCounts = countBy('gender');
+        const ageCounts = countBy('age');
+        const eduCounts = countBy('education');
+
+        new Chart(document.getElementById('genderChart'), {
+            type: 'pie',
+            data: { labels: Object.keys(genderCounts), datasets: [{ data: Object.values(genderCounts), backgroundColor: ['#3b82f6', '#ec4899'] }] },
+            options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'สัดส่วนเพศ', font: {family:'Prompt'} } } }
+        });
+
+        new Chart(document.getElementById('ageChart'), {
+            type: 'bar',
+            data: { labels: Object.keys(ageCounts), datasets: [{ label: 'จำนวน', data: Object.values(ageCounts), backgroundColor: '#f59e0b' }] },
+            options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'ช่วงอายุ', font: {family:'Prompt'} }, legend: {display:false} } }
+        });
+
+        new Chart(document.getElementById('eduChart'), {
+            type: 'bar',
+            data: { labels: Object.keys(eduCounts), datasets: [{ label: 'จำนวน', data: Object.values(eduCounts), backgroundColor: '#10b981' }] },
+            options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { title: { display: true, text: 'ระดับการศึกษา', font: {family:'Prompt'} }, legend: {display:false} } }
+        });
+    }
+
+    function calculateAverage(prop) {
+        if (appData.length === 0) return 0;
+        const validUsers = appData.filter(u => typeof u[prop] === 'number');
+        if (validUsers.length === 0) return 0;
+        const sum = validUsers.reduce((a, b) => a + (b[prop] || 0), 0);
+        return (sum / validUsers.length).toFixed(2);
+    }
+
+    // Initialize
+    navigate('home');
+
+</script>
+</body>
+</html>
