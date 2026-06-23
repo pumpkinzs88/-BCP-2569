@@ -49,7 +49,7 @@
     </main>
 
     <footer class="bg-blue-900 text-white text-center p-4 text-xs sm:text-sm mt-auto">
-        &copy;  กลุ่มงานสุขภาพดิจิทัล โรงพยาบาลจอมพระ  ปีงบ 2569
+        &copy;  กลุ่มงานสุขภาพดิจิทัล โรงพยาบาลจอมพระ (แผน BCP) ปีงบ 2569
     </footer>
 
 <script>
@@ -80,6 +80,9 @@
     let currentUser = null;
     let currentQuizAnswers = [];
     let activeTestType = ''; // 'pre', 'post', or 'survey'
+
+    // นำลิงก์ GAS ของคุณมาตั้งเป็นตัวแปรหลัก (เพื่อให้ดึงข้อมูลได้)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwfEJ6JVnz56qCCISvWcnCw2cT_i2aNLjcwy6mx2NU_dmsoAFLbAg_pxU3w4CkHeiAzbg/exec";
 
     // Dashboard Charts References
     let prePostChart, genderChart, ageChart, eduChart, surveyChart, surveySubChart;
@@ -421,9 +424,32 @@
             .then(() => navigate('home'));
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
         e.preventDefault();
         if(document.getElementById('adminUser').value === 'admin' && document.getElementById('adminPass').value === '1234') {
+            
+            // สั่งให้โชว์หน้าต่างโหลดข้อมูล
+            Swal.fire({
+                title: 'กำลังเชื่อมต่อฐานข้อมูล...',
+                text: 'กรุณารอสักครู่ ระบบกำลังดึงข้อมูลอัปเดตจาก Google Sheets',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+
+            try {
+                // ดึงข้อมูลมาจาก Google Sheets ของคุณ
+                const response = await fetch(GAS_URL);
+                const serverData = await response.json();
+                
+                if(serverData && !serverData.error) {
+                    appData = serverData; // เอาข้อมูลจาก Sheet มาแทนที่ข้อมูลในเครื่อง
+                    saveDataLocally();
+                }
+            } catch (error) {
+                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลจาก Server:", error);
+            }
+            
+            Swal.close();
             navigate('dashboard');
         } else {
             Swal.fire({ icon: 'error', title: 'รหัสผ่านผิด!' });
@@ -435,8 +461,7 @@
     }
 
     function sendToGAS(data) {
-        const gasUrl = "https://script.google.com/macros/s/AKfycbwfEJ6JVnz56qCCISvWcnCw2cT_i2aNLjcwy6mx2NU_dmsoAFLbAg_pxU3w4CkHeiAzbg/exec";
-        fetch(gasUrl, { method: 'POST', body: JSON.stringify(data) })
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) })
         .then(response => console.log('ส่งข้อมูลลง Google Sheets เรียบร้อยแล้ว'))
         .catch(error => console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error));
     }
